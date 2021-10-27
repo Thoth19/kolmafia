@@ -70,6 +70,7 @@ public class LogStream extends PrintStream implements Runnable {
       newStream.println(" User: " + KoLCharacter.getUserName());
       newStream.println(" Current run: " + KoLCharacter.getCurrentRun());
       newStream.println(" MRU Script: " + KoLConstants.scriptMList.getFirst());
+      newStream.println(" Build: " + StaticEntity.getBuild());
       newStream.println("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
       newStream.println();
       newStream.println();

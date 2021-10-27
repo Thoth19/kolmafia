@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.java.dev.spellcast.utilities.ActionPanel;
 import net.java.dev.spellcast.utilities.DataUtilities;
 import net.sourceforge.kolmafia.KoLConstants.MafiaState;
@@ -121,33 +123,35 @@ public abstract class StaticEntity {
     return StaticEntity.cachedRevisionNumber;
   }
 
+  public static final String getBuild() {
+    Attributes attributes = getAttributes();
+    if (attributes == null) return null;
+    return Stream.of("Build-Branch", "Build-Build", "Build-Dirty")
+        .map(a -> attributes.getValue(a))
+        .filter(a -> a != null && !a.equals("false"))
+        .map(a -> a.equals("true") ? "-M" : a)
+        .collect(Collectors.joining());
+  }
+
   public static final String getBuildInfo() {
     if (StaticEntity.cachedBuildInfo == null) {
       StringBuilder cachedBuildInfo = new StringBuilder("Build");
 
+      String build = getBuild();
+      if (build != null) {
+        cachedBuildInfo.append(" ").append(build);
+      }
+
       Attributes attributes = getAttributes();
 
       if (attributes != null) {
-        String attribute = attributes.getValue("Build-Branch");
-        if (attribute != null) {
-          cachedBuildInfo.append(" ").append(attribute).append("-");
-        }
-        attribute = attributes.getValue("Build-Build");
-        if (attribute != null) {
-          cachedBuildInfo.append(attribute);
-        }
-        attribute = attributes.getValue("Build-Dirty");
-        if (attribute.equals("true")) {
-          cachedBuildInfo.append("-M");
-        }
-        attribute = attributes.getValue("Build-Jdk");
-        if (attribute != null) {
-          cachedBuildInfo.append(" ").append(attribute);
-        }
-        attribute = attributes.getValue("Build-OS");
-        if (attribute != null) {
-          cachedBuildInfo.append(" ").append(attribute);
-        }
+        cachedBuildInfo
+            .append(" ")
+            .append(
+                Stream.of("Build-Jdk", "Build-OS")
+                    .map(a -> attributes.getValue(a))
+                    .filter(a -> a != null)
+                    .collect(Collectors.joining(" ")));
       }
 
       if (cachedBuildInfo.toString().equals("Build")) {
